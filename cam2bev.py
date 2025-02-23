@@ -93,12 +93,9 @@ def mouse_callback(event, x, y, flags, param):
             cv2.destroyAllWindows()
 
 # Main processing
-base_path = "./data/raw_images/"
+base_path = "./data/resized_calib_images/"
 cam_views = ["1L", "2L", "M", "1R", "2R"]
-raw_image_paths = [base_path + cam_view + ".jpg" for cam_view in cam_views]
-
-output_dir = "./data/resized_calib_images"
-image_paths = resize_and_save_images(raw_image_paths, output_dir, scale_factor=0.25)
+image_paths = [base_path + cam_view + ".jpg" for cam_view in cam_views]
 
 # Load points data if available
 points_file = "./data/selected_points.json"
@@ -152,6 +149,13 @@ for i, warped_image in enumerate(warped_images):
 stitcher = cv2.Stitcher_create()
 status, stitched_image = stitcher.stitch(warped_images)
 
+err_dict = {
+    cv2.STITCHER_OK: "STITCHER_OK",
+    cv2.STITCHER_ERR_NEED_MORE_IMGS: "STITCHER_ERR_NEED_MORE_IMGS",
+    cv2.STITCHER_ERR_HOMOGRAPHY_EST_FAIL: "STITCHER_ERR_HOMOGRAPHY_EST_FAIL",
+    cv2.STITCHER_ERR_CAMERA_PARAMS_ADJUST_FAIL: "STITCHER_ERR_CAMERA_PARAMS_ADJUST_FAIL",
+}
+
 if status == cv2.Stitcher_OK:
     cv2.imshow("Final Bird's-Eye View", stitched_image)
     cv2.waitKey(0)
@@ -159,11 +163,8 @@ if status == cv2.Stitcher_OK:
     cv2.imwrite("stitched_top_view.jpg", stitched_image)
     print("Stitched image saved successfully!")
 else:
-    print(f"Error during stitching: {status}")
-    if status == cv2.Stitcher_ERR_NEED_MORE_IMGS:
-        print("Stitching requires more images.")
-    elif status == cv2.Stitcher_ERR_HOMOGRAPHY_ESTIMATION_FAILED:
-        print("Homography estimation failed. This may happen if the images do not overlap well.")
+    print(f"Stitching failed with error code {status} : {err_dict[status]}")
+    exit(status)
 
 # Save the final stitched output
 cv2.imwrite("stitched_top_view.jpg", stitched_image)
