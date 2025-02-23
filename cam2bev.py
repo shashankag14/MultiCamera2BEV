@@ -1,5 +1,6 @@
 import os
 import cv2
+from pathlib import Path
 import numpy as np
 
 def resize_and_save_images(image_paths, output_dir, scale_factor=0.5):
@@ -41,17 +42,31 @@ def mouse_callback(event, x, y, flags, param):
             cv2.destroyAllWindows()
 
 def get_manual_points(image_path):
-    """Opens an image and lets the user click 4 points"""
+    """Opens an image, lets the user click 4 points, and overlays them with labels"""
     global selected_points
     selected_points = []
     print('-------------')
     print(f"Image: {image_path}")
     img = cv2.imread(image_path)
-    cv2.imshow("Click 4 corners of the table", img)
-    cv2.setMouseCallback("Click 4 corners of the table", mouse_callback)
+    # a copy to overlay points without modifying original image
+    img_copy = img.copy()
+
+    cv2.imshow("Click 4 taped corners", img)
+    cv2.setMouseCallback("Click 4 taped corners", mouse_callback)
     cv2.waitKey(0)
-    
-    return np.array(selected_points, dtype=np.float32)
+
+    # Overlay selected points onto the image
+    for i, (x, y) in enumerate(selected_points):
+        cv2.circle(img_copy, (x, y), 5, (0, 0, 255), -1)
+        cv2.putText(img_copy, f"Point {i+1}", (x + 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+
+    # Save the image with overlaid selected points
+    output_img_path = Path(Path(image_path).parent, "overlay_points", Path(image_path).name)
+    os.makedirs(output_img_path.parent, exist_ok=True)
+    cv2.imwrite(output_img_path, img_copy)
+    print(f"Saved image with points: {output_img_path}")
+
+    return np.array(selected_points, dtype=np.float32), output_img_path
 
 # Define image paths for the 5 cameras
 base_path = "./data/raw_images/"
@@ -61,9 +76,14 @@ raw_image_paths = [base_path + cam_view + ".jpg" for cam_view in cam_views]
 output_dir = "./data/resized_calib_images"
 image_paths = resize_and_save_images(raw_image_paths, output_dir, scale_factor=0.25)
 
-# Step 1: Get manual points from each image
-src_pts_list = [get_manual_points(img) for img in image_paths]
-print(src_pts_list)
+# Step 1: Get manual points from each image and save images with overlaid points
+src_pts_list = []
+output_img_paths = []
+
+for img_path in image_paths:
+    src_pts, output_img_path = get_manual_points(img_path)
+    src_pts_list.append(src_pts)
+    output_img_paths.append(output_img_path)
 
 # Step 2: Define the destination (bird's-eye view) coordinates
 dst_width, dst_height = 500, 300  # Scale for better visualization
