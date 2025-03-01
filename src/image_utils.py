@@ -50,7 +50,7 @@ def visualize_keypoints(image, output_img_path, title="Keypoints"):
     """Detect and draw keypoints on an image."""
     img_copy = image.copy()
     gray = cv2.cvtColor(img_copy, cv2.COLOR_BGR2GRAY)
-    orb = cv2.ORB_create()  # TODO: try SIFT_create
+    orb = cv2.SIFT_create()  # TODO: try SIFT_create or ORB_create, see README.md
     keypoints = orb.detect(gray, None)
 
     # Draw keypoints on the image
@@ -71,7 +71,7 @@ def enhance_contrast(image):
     l, a, b = cv2.split(lab)
 
     # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)
-    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(5, 5))
     l = clahe.apply(l)
 
     enhanced = cv2.merge((l, a, b))

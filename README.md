@@ -34,9 +34,30 @@ python main.py
 - The final shape of the BEV output matters how the input images are warped and how much overlap they share with each other. Fine-tuning the final output shape always helps.
 - Make sure that you have enough features in each warped image after applying the homography. These features are used for feature matching and image stitching at the end.
 
+### Analysis: Feature Detection and Matching (ORB v/s SIFT)
+**1. ORB (Oriented FAST & Rotated BRIEF)**
+- Uses *FAST (Features from Accelerated Segment Test)* for keypoint detection.
+- Uses *BRIEF (Binary Robust Independent Elementary Features)* for feature description.
+- Improves BRIEF by adding *rotation invariance*.
+- Uses *Hamming Distance* for feature matching, making it very fast.
+
+**2. SIFT (Scale-Invariant Feature Transform)**
+- Finds *keypoints at multiple scales** using the *Difference of Gaussians (DoG)*.
+- Computes a *128-dimensional descriptor* for each keypoint.
+- Uses *Euclidean Distance* for feature matching.
+- More accurate but computationally heavy.
+
+| Use Case                                      | ORB | SIFT |
+|----------------------------------------------|-----|-----|
+| Real-time applications (fast in computation) | ✅ | ❌ |
+| Low computational power (suitable for edge devices) | ✅ | ❌ |
+| High accuracy (for image stitching) | ❌ | ✅ |
+| Works well in varying lighting conditions (eg. low light, shadows) | ❌ | ✅ |
+| Works well in case of less features (eg. walls, sky, smooth surfaces) | ❌ | ✅ |
+
 ## ToDo:
-&#9744;  Analyze different feature detection techniques - OBR, SIFT \
-&#9744; Investigate on enhacing the warped images, if there aren't enough features available for feature matching \
+&#9745;  Analyze different feature detection techniques - OBR, SIFT \
+&#9744; Investigate on enhacing the warped images (if there aren't enough features available for feature matching) \
 &#9744; Choose the best shape for BEV output. It affects the warped images generated after applying the homography \
 &#9744; Use a logger for the repository \
 &#9744; Improve error handling \
