@@ -1,6 +1,7 @@
 import cv2
 import os
 
+
 def resize_and_save_images(image_paths, output_dir, scale_factor=0.5):
     """Resizes images and saves them in a new folder. (if needed)"""
     if not os.path.exists(output_dir):
@@ -9,13 +10,16 @@ def resize_and_save_images(image_paths, output_dir, scale_factor=0.5):
     resized_paths = []
     for img_path in image_paths:
         img = cv2.imread(img_path)
-        
+        print(f"Loading image: {img_path}")
+        print(f"Original Image Shape: {img.shape[:-1]}")
+
         if img is None:
             print(f"Error: Could not load {img_path}. Skipping.")
             continue
-        
+
         # Resize image
         resized_img = cv2.resize(img, (0, 0), fx=scale_factor, fy=scale_factor)
+        print(f"Resized Image Shape: {resized_img.shape[:-1]}")
 
         # Save resized image
         filename = os.path.basename(img_path)
@@ -26,6 +30,7 @@ def resize_and_save_images(image_paths, output_dir, scale_factor=0.5):
         print(f"Saved resized image: {new_path}")
 
     return resized_paths  # Return new paths to use in BEV processing
+
 
 def save_image_with_points(image, points, output_img_path):
     """Overlay points on an image and save."""

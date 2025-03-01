@@ -1,10 +1,14 @@
 import os
 import cv2
+import argparse
 import numpy as np
 from pathlib import Path
+from src.common_utils import yaml_to_namespace
 from src.points_manager import load_points, save_points
 from src.bev_processor import BirdEyeViewProcessor
+from src.image_utils import resize_and_save_images
 
+# Error codes for Stitcher
 stitch_err_dict = {
     cv2.STITCHER_OK: "STITCHER_OK",
     cv2.STITCHER_ERR_NEED_MORE_IMGS: "STITCHER_ERR_NEED_MORE_IMGS",
@@ -15,6 +19,7 @@ stitch_err_dict = {
 # Global variables
 selected_points = []
 
+
 # Callback function for mouse events to select points
 def mouse_callback(event, x, y, flags, param):
     """Callback function to capture points on mouse click"""
@@ -24,6 +29,7 @@ def mouse_callback(event, x, y, flags, param):
 
         if len(selected_points) == 4:
             cv2.destroyAllWindows()
+
 
 def get_manual_points(image_path):
     """Opens an image, lets the user click 4 points, and overlays them with labels."""
@@ -51,40 +57,66 @@ def get_manual_points(image_path):
 
     return np.array(selected_points, dtype=np.float32)
 
-def main():
-    # image paths for calibration and stitching
-    base_path = "./data/resized_calib_images/"
-    cam_views = ["1L", "2L", "M", "1R", "2R"]
-    image_paths = [base_path + cam_view + ".jpg" for cam_view in cam_views]
 
-    # Load previously saved points for calibration
-    points_file = "./data/selected_points.json"
-    src_pts_list = load_points(points_file) or []
+def main(args):
+    # Get config params
+    config = yaml_to_namespace(args.config[0])
 
+    # Get paths to images from multi camera
+    image_paths = [config["RAW_IMAGE_PATH"] +
+                   cam_view + ".jpg" for cam_view in config["CAMERA_VIEWS"]]
+
+    # Resize images (if too large, optional)
+    if config["RESIZE_OP"]["ENABLE"]:
+        image_paths = resize_and_save_images(
+            image_paths,
+            output_dir=config["RESIZE_OP"]["RESIZED_IMAGE_PATH"],
+            scale_factor=config["RESIZE_OP"]["SCALE"])
+
+    # Load previously saved points for calibration if available
+    if config["CALIB_POINTS"]["ENABLE_AUTO_SELECT"]:
+        src_pts_list = load_points(config["CALIB_POINTS"]["CALIB_POINTS_JSON"])
+    else:
+        src_pts_list = []
+
+    print(f"Loading images for calibration from {Path(image_paths[0]).parent}")
     # If no points found, let the user select them manually and save
     if not src_pts_list:
-        print("No points found. Please manually select points.")
+        print("Manual selection of calibration points enabled")
         for image_path in image_paths:
             src_pts = get_manual_points(image_path)
             src_pts_list.append(src_pts)
-        save_points(points_file, src_pts_list)
+        save_points(config["CALIB_POINTS"]["CALIB_POINTS_JSON"], src_pts_list)
 
     # Destination bird's-eye view coordinates
-    dst_pts = np.float32([[0, 0], [500, 0], [500, 300], [0, 300]])
+    dst_pts = np.float32([[0, 0],
+                          [config["BEV_SIZE"]["WIDTH"], 0],
+                          [config["BEV_SIZE"]["WIDTH"], config["BEV_SIZE"]["HEIGHT"]],
+                          [0, config["BEV_SIZE"]["HEIGHT"]]])
 
     # Process images for BEV
-    bev_processor = BirdEyeViewProcessor(image_paths, dst_pts, "./data/warped_images")
+    bev_processor = BirdEyeViewProcessor(image_paths, dst_pts, config["WARPED_IMAGE_PATH"])
     warped_images = bev_processor.process(src_pts_list)
 
     # Stitch images
     stitcher = cv2.Stitcher_create()
     status, stitched_image = stitcher.stitch(warped_images)
-    
+
     if status == cv2.Stitcher_OK:
         cv2.imwrite("stitched_top_view.jpg", stitched_image)
         print("Stitched image saved successfully!")
     else:
         print(f"Stitching failed with error code {status} : {stitch_err_dict[status]}")
 
+
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description="Choose the config to be used.")
+    parser.add_argument(
+        "--config", nargs="+",
+        help="Path to the config file.", default=["./config.yaml"]
+    )
+
+    args = parser.parse_args()
+
+    main(args)

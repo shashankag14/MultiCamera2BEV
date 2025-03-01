@@ -1,6 +1,6 @@
 import cv2
-import numpy as np
-from .image_utils import resize_and_save_images, save_image_with_points
+from .image_utils import save_image_with_points
+
 
 class BirdEyeViewProcessor:
     def __init__(self, image_paths, dst_pts, output_dir):

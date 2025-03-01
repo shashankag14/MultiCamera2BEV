@@ -1,0 +1,17 @@
+CAMERA_VIEWS:
+  - "Front"
+  - "Left"
+  - "Rear"
+  - "Right"
+CALIB_POINTS:
+  ENABLE_AUTO_SELECT: True
+  CALIB_POINTS_JSON: "./data/calib_points.json"
+RAW_IMAGE_PATH: "./data/raw_images/"
+WARPED_IMAGE_PATH: "./data/warped_images/"
+RESIZE_OP:
+  ENABLE: True
+  SCALE: 0.1
+  RESIZED_IMAGE_PATH: "./data/resized_images/"
+BEV_SIZE:
+  WIDTH: 500
+  HEIGHT: 300
