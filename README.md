@@ -3,7 +3,7 @@ A classicial computer vision based approach to transform images from multi-camer
 
 > The code implementation is in progress.
 
-![Source: https://www.researchgate.net/figure/Birds-eye-view-vision-system-Images-F-f-F-l-F-r-F-b-are-captured-from-the-front_fig4_273596538](image.png)
+![Source: https://www.researchgate.net/figure/Birds-eye-view-vision-system-Images-F-f-F-l-F-r-F-b-are-captured-from-the-front_fig4_273596538](images/readme_image.png)
 *Source: [Automatic Parking based on a Bird's Eye View System](https://www.researchgate.net/figure/Birds-eye-view-vision-system-Images-F-f-F-l-F-r-F-b-are-captured-from-the-front_fig4_273596538)*
 
 ## Steps
@@ -35,9 +35,9 @@ python main.py
 - Make sure that you have enough features in each warped image after applying the homography. These features are used for feature matching and image stitching at the end.
 
 ## ToDo:
-&#9744;  Analyze different feature detection techniques - OBR, SIFT
-&#9744; Investigate on enhacing the warped images, if there aren't enough features available for feature matching
-&#9744; Choose the best shape for BEV output. It affects the warped images generated after applying the homography
-&#9744; Use a logger for the repository
-&#9744; Improve error handling
+&#9744;  Analyze different feature detection techniques - OBR, SIFT \
+&#9744; Investigate on enhacing the warped images, if there aren't enough features available for feature matching \
+&#9744; Choose the best shape for BEV output. It affects the warped images generated after applying the homography \
+&#9744; Use a logger for the repository \
+&#9744; Improve error handling \
 &#9744; Refactor main.py
