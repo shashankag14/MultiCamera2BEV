@@ -4,10 +4,11 @@ from .image_utils import save_image_with_points, visualize_keypoints, enhance_co
 
 
 class BirdEyeViewProcessor:
-    def __init__(self, image_paths, dst_pts, output_dir):
+    def __init__(self, image_paths, dst_pts, output_dir, use_sift=True):
         self.image_paths = image_paths
         self.dst_pts = dst_pts
         self.output_dir = output_dir
+        self.use_sift = use_sift
         self.src_pts_list = []
 
     def compute_homographies(self, src_pts_list):
@@ -21,6 +22,7 @@ class BirdEyeViewProcessor:
 
     def warp_images(self, homographies):
         """Warp each image to bird's-eye view."""
+        # TODO: pass width and height of dst points using config
         dst_width, dst_height = 500, 300  # Scale for better visualization
         warped_images = [
             cv2.warpPerspective(cv2.imread(img), H, (dst_width, dst_height))
@@ -33,7 +35,7 @@ class BirdEyeViewProcessor:
         for i, warped_image in enumerate(images):
             path_to_save = f"{self.output_dir}/detected_features/warped_image_{i}.jpg"
             visualize_keypoints(
-                warped_image, path_to_save, title=f"Keypoints in Image {i}")
+                warped_image, path_to_save, self.use_sift, title=f"Keypoints in Image {i}")
 
     def process(self, src_pts_list):
         homographies = self.compute_homographies(src_pts_list)

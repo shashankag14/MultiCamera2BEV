@@ -28,13 +28,11 @@ Run the following command form the root directory:
 python main.py
 ```
 
-## Side Notes
-- The ``calib_points.json`` file is used to save the points you manually select. If you already have this file, the script skips the manual selection and use the saved points.
-- The images should be correctly oriented and the selected points should correspond to the desired region for the bird's-eye view.
+## Notes
 - The final shape of the BEV output matters how the input images are warped and how much overlap they share with each other. Fine-tuning the final output shape always helps.
 - Make sure that you have enough features in each warped image after applying the homography. These features are used for feature matching and image stitching at the end.
 
-### Analysis: Feature Detection and Matching (ORB v/s SIFT)
+## Analysis: Feature Detection and Matching (ORB v/s SIFT)
 **1. ORB (Oriented FAST & Rotated BRIEF)**
 - Uses *FAST (Features from Accelerated Segment Test)* for keypoint detection.
 - Uses *BRIEF (Binary Robust Independent Elementary Features)* for feature description.
@@ -54,6 +52,16 @@ python main.py
 | High accuracy (for image stitching) | ❌ | ✅ |
 | Works well in varying lighting conditions (eg. low light, shadows) | ❌ | ✅ |
 | Works well in case of less features (eg. walls, sky, smooth surfaces) | ❌ | ✅ |
+
+## Analysis: Image Stitching Mode for OpenCV
+When stitching images for a bird's eye view, selecting the right stitching mode is important. In this project, I used OpenCV's `cv2.createStitcher()` to stitch the warped images. OpenCV provides two different modes for this - `cv2.Stitcher_SCANS` and `cv2.Stitcher_PANORAMA`.
+| `cv2.Stitcher_SCANS` | `cv2.Stitcher_PANORAMA` |
+|-----|-----|
+| Designed for stitching *scanned* like surfaces (eg. documents, maps, BEVs)  | Designed for stitching wide-angle views |
+| Works well when images are captured **for a single view point** and covers a flat (or planar) surface. | Works well when images are captured **from a single view point** but different angles |
+| Works best when there’s no depth variation between images. | Doesn't handle parallax very well and may lead to some distortions. |
+
+Since our goal is to generate a vird's eye view image based on multiple camera images, **we use `cv2.Stitcher_SCANS` mode**. Each camera points directly downwards and aligned in a way that the field of view overlaps appropriately to cover an entire area. 
 
 ## ToDo:
 &#9745;  Analyze different feature detection techniques - OBR, SIFT \

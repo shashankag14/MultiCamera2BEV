@@ -1,7 +1,7 @@
 CAMERA_VIEWS:
   - "Front"
   - "Left"
-  - "Rear"
+  - "Back"
   - "Right"
 CALIB_POINTS:
   ENABLE_AUTO_SELECT: True
@@ -15,3 +15,4 @@ RESIZE_OP:
 BEV_SIZE:
   WIDTH: 500
   HEIGHT: 300
+USE_SIFT: True

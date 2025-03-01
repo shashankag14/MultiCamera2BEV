@@ -67,6 +67,7 @@ def main(args):
                    cam_view + ".jpg" for cam_view in config["CAMERA_VIEWS"]]
 
     # Resize images (if too large, optional)
+    # NOTE: it might lead to loss in image features
     if config["RESIZE_OP"]["ENABLE"]:
         image_paths = resize_and_save_images(
             image_paths,
@@ -95,11 +96,14 @@ def main(args):
                           [0, config["BEV_SIZE"]["HEIGHT"]]])
 
     # Process images for BEV
-    bev_processor = BirdEyeViewProcessor(image_paths, dst_pts, config["WARPED_IMAGE_PATH"])
+    bev_processor = BirdEyeViewProcessor(image_paths, dst_pts,
+                                         config["WARPED_IMAGE_PATH"],
+                                         use_sift=config['USE_SIFT'])
     warped_images = bev_processor.process(src_pts_list)
 
     # Stitch images
-    stitcher = cv2.Stitcher_create()
+    # Use cv2.Stitcher_SCANS for BEV generation
+    stitcher = cv2.Stitcher_create(cv2.Stitcher_SCANS)
     status, stitched_image = stitcher.stitch(warped_images)
 
     if status == cv2.Stitcher_OK:

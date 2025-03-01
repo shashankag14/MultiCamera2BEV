@@ -46,19 +46,23 @@ def save_image_with_points(image, points, output_img_path):
     print(f"Saved image with points: {output_img_path}")
 
 
-def visualize_keypoints(image, output_img_path, title="Keypoints"):
+def visualize_keypoints(image, output_img_path, use_sift=True, title="Keypoints"):
     """Detect and draw keypoints on an image."""
     img_copy = image.copy()
     gray = cv2.cvtColor(img_copy, cv2.COLOR_BGR2GRAY)
-    orb = cv2.SIFT_create()  # TODO: try SIFT_create or ORB_create, see README.md
-    keypoints = orb.detect(gray, None)
+
+    if use_sift:
+        feature_detector = cv2.SIFT_create()
+    else:
+        feature_detector = cv2.ORB_create()
+    keypoints = feature_detector.detect(gray, None)
 
     # Draw keypoints on the image
     output = cv2.drawKeypoints(img_copy, keypoints, None, color=(0, 255, 0))
 
     # Show the image
     os.makedirs(os.path.dirname(output_img_path), exist_ok=True)
-    cv2.imwrite(output_img_path, img_copy)
+    cv2.imwrite(output_img_path, output)
     cv2.imshow(title, output)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
