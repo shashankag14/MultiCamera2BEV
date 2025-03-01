@@ -16,5 +16,15 @@ python main.py
 ```
 
 ## Side Notes
-- The ``selected_points.json`` file is used to save the points you manually select. If you already have this file, the script skips the manual selection and use the saved points.
+- The ``calib_points.json`` file is used to save the points you manually select. If you already have this file, the script skips the manual selection and use the saved points.
 - The images should be correctly oriented and the selected points should correspond to the desired region for the bird's-eye view.
+- The final shape of the BEV output matters how the input images are warped and how much overlap they share with each other. Fine-tuning the final output shape always helps.
+- Make sure that you have enough features in each warped image after applying the homography. These features are used for feature matching and image stitching at the end.
+
+## ToDo:
+&#9744;  Analyze different feature detection techniques - OBR, SIFT
+&#9744; Investigate on enhacing the warped images, if there aren't enough features available for feature matching
+&#9744; Choose the best shape for BEV output. It affects the warped images generated after applying the homography
+&#9744; Use a logger for the repository
+&#9744; Improve error handling
+&#9744; Refactor main.py
