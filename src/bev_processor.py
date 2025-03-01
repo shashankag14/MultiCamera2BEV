@@ -1,5 +1,6 @@
 import cv2
-from .image_utils import save_image_with_points
+import numpy as np
+from .image_utils import save_image_with_points, visualize_keypoints, enhance_contrast
 
 
 class BirdEyeViewProcessor:
@@ -27,6 +28,13 @@ class BirdEyeViewProcessor:
         ]
         return warped_images
 
+    def vis_detected_features(self, images):
+        """Visualize detected features in each warped image."""
+        for i, warped_image in enumerate(images):
+            path_to_save = f"{self.output_dir}/detected_features/warped_image_{i}.jpg"
+            visualize_keypoints(
+                warped_image, path_to_save, title=f"Keypoints in Image {i}")
+
     def process(self, src_pts_list):
         homographies = self.compute_homographies(src_pts_list)
         warped_images = self.warp_images(homographies)
@@ -37,5 +45,17 @@ class BirdEyeViewProcessor:
                 continue
             warped_image_path = f"{self.output_dir}/warped_image_{i}.jpg"
             save_image_with_points(warped_image, [], warped_image_path)
+
+        # Apply contrast enhancement to all images
+        warped_images = [enhance_contrast(img) for img in warped_images]
+
+        # Visualize all warped image side by side to verify the overlap
+        combined = np.hstack(warped_images)
+        cv2.imwrite(f"{self.output_dir}/warped_images_combined.jpg", combined)
+        cv2.imshow("Warped Images Combined", combined)
+        cv2.waitKey(0)
+
+        # Visualise detected features in each warped image
+        self.vis_detected_features(warped_images)
 
         return warped_images

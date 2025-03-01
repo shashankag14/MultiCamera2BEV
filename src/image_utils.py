@@ -38,8 +38,41 @@ def save_image_with_points(image, points, output_img_path):
 
     for i, (x, y) in enumerate(points):
         cv2.circle(img_copy, (x, y), 5, (0, 0, 255), -1)
-        cv2.putText(img_copy, f"Point {i+1}", (x + 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+        cv2.putText(img_copy, f"Point {i+1}", (x + 10, y - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
     os.makedirs(os.path.dirname(output_img_path), exist_ok=True)
     cv2.imwrite(output_img_path, img_copy)
     print(f"Saved image with points: {output_img_path}")
+
+
+def visualize_keypoints(image, output_img_path, title="Keypoints"):
+    """Detect and draw keypoints on an image."""
+    img_copy = image.copy()
+    gray = cv2.cvtColor(img_copy, cv2.COLOR_BGR2GRAY)
+    orb = cv2.ORB_create()  # TODO: try SIFT_create
+    keypoints = orb.detect(gray, None)
+
+    # Draw keypoints on the image
+    output = cv2.drawKeypoints(img_copy, keypoints, None, color=(0, 255, 0))
+
+    # Show the image
+    os.makedirs(os.path.dirname(output_img_path), exist_ok=True)
+    cv2.imwrite(output_img_path, img_copy)
+    cv2.imshow(title, output)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    print(f"Saved image with features: {output_img_path}")
+
+
+def enhance_contrast(image):
+    """Apply adaptive histogram equalization to improve contrast."""
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    l, a, b = cv2.split(lab)
+
+    # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+    l = clahe.apply(l)
+
+    enhanced = cv2.merge((l, a, b))
+    return cv2.cvtColor(enhanced, cv2.COLOR_LAB2BGR)
