@@ -99,7 +99,7 @@ def main(args):
     bev_processor = BirdEyeViewProcessor(image_paths, dst_pts,
                                          config["WARPED_IMAGE_PATH"],
                                          use_sift=config['USE_SIFT'])
-    warped_images = bev_processor.process(src_pts_list)
+    warped_images = bev_processor.process(src_pts_list, config["FEATURE_ENHANCEMENT"])
 
     # Stitch images
     # Use cv2.Stitcher_SCANS for BEV generation

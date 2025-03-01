@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-from .image_utils import save_image_with_points, visualize_keypoints, enhance_contrast
+from .image_utils import (
+    save_image_with_points, visualize_keypoints, enhance_contrast)
 
 
 class BirdEyeViewProcessor:
@@ -37,7 +38,7 @@ class BirdEyeViewProcessor:
             visualize_keypoints(
                 warped_image, path_to_save, self.use_sift, title=f"Keypoints in Image {i}")
 
-    def process(self, src_pts_list):
+    def process(self, src_pts_list, feature_enhancement=False):
         homographies = self.compute_homographies(src_pts_list)
         warped_images = self.warp_images(homographies)
 
@@ -48,8 +49,9 @@ class BirdEyeViewProcessor:
             warped_image_path = f"{self.output_dir}/warped_image_{i}.jpg"
             save_image_with_points(warped_image, [], warped_image_path)
 
-        # Apply contrast enhancement to all images
-        warped_images = [enhance_contrast(img) for img in warped_images]
+        # Enahnce the contrast of warped images to boost the feature selection
+        if feature_enhancement:
+            warped_images = [enhance_contrast(img) for img in warped_images]
 
         # Visualize all warped image side by side to verify the overlap
         combined = np.hstack(warped_images)

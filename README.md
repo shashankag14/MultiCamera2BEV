@@ -63,9 +63,18 @@ When stitching images for a bird's eye view, selecting the right stitching mode 
 
 Since our goal is to generate a vird's eye view image based on multiple camera images, **we use `cv2.Stitcher_SCANS` mode**. Each camera points directly downwards and aligned in a way that the field of view overlaps appropriately to cover an entire area. 
 
+## Analysis: Warped Image Enhancement
+If the warped images generated after applying the homography lacks sufficient features for matching (using ORB or SIFT), follow the steps below to enhance the image and improve feature detection:
+
+- Visualize Detected Keypoints:Display the detected keypoints on the warped image to check the number and quality of features. Check how many keypoints have good matches across the warped images. If there are few or poor matches between the images, it indicates insufficient features for reliable matching.
+- Enhance the Image Features:
+    - increase the image contrast 
+    - apply sharpening techniques to highlight edges
+    - apply histogram equalization to mprove the distribution of pixel intensities (also known as contrast stretching)
+- Recheck Feature Detection: After enhancing the warped images, rerun the feature detection and matching process to see if the number of good matches improves.
+
 ## ToDo:
-&#9745;  Analyze different feature detection techniques - OBR, SIFT \
-&#9744; Investigate on enhacing the warped images (if there aren't enough features available for feature matching) \
+&#9745; Investigate on enhacing the warped images (if there aren't enough features available for feature matching) \
 &#9744; Choose the best shape for BEV output. It affects the warped images generated after applying the homography \
 &#9744; Use a logger for the repository \
 &#9744; Improve error handling \
