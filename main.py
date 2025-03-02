@@ -78,25 +78,16 @@ def main(args):
     if config["CALIB_POINTS"]["ENABLE_AUTO_SELECT"]:
         src_pts_list = load_points(config["CALIB_POINTS"]["CALIB_POINTS_JSON"])
     else:
-        src_pts_list = []
-
-    print(f"Loading images for calibration from {Path(image_paths[0]).parent}")
-    # If no points found, let the user select them manually and save
-    if not src_pts_list:
+        # If no points found, let the user select them manually and save
         print("Manual selection of calibration points enabled")
         for image_path in image_paths:
             src_pts = get_manual_points(image_path)
             src_pts_list.append(src_pts)
         save_points(config["CALIB_POINTS"]["CALIB_POINTS_JSON"], src_pts_list)
 
-    # Destination bird's-eye view coordinates
-    dst_pts = np.float32([[0, 0],
-                          [config["BEV_SIZE"]["WIDTH"], 0],
-                          [config["BEV_SIZE"]["WIDTH"], config["BEV_SIZE"]["HEIGHT"]],
-                          [0, config["BEV_SIZE"]["HEIGHT"]]])
-
     # Process images for BEV
-    bev_processor = BirdEyeViewProcessor(image_paths, dst_pts,
+    bev_processor = BirdEyeViewProcessor(image_paths,
+                                         config["BEV_SIZE"],
                                          config["WARPED_IMAGE_PATH"],
                                          use_sift=config['USE_SIFT'])
     warped_images = bev_processor.process(src_pts_list, config["FEATURE_ENHANCEMENT"])

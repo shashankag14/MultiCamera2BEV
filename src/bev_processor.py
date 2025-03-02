@@ -5,18 +5,24 @@ from .image_utils import (
 
 
 class BirdEyeViewProcessor:
-    def __init__(self, image_paths, dst_pts, output_dir, use_sift=True):
+    def __init__(self, image_paths, bev_size, output_dir, use_sift=True):
         self.image_paths = image_paths
-        self.dst_pts = dst_pts
+        self.bev_size = bev_size
         self.output_dir = output_dir
         self.use_sift = use_sift
+
+        # Destination bird's-eye view coordinates
+        self.dst_pts = np.float32([[0, 0],
+                                   [bev_size["WIDTH"], 0],
+                                   [bev_size["WIDTH"], bev_size["HEIGHT"]],
+                                   [0, bev_size["HEIGHT"]]])
         self.src_pts_list = []
 
     def compute_homographies(self, src_pts_list):
         """Compute homographies for each camera."""
         homographies = []
         for src in src_pts_list:
-            H, status = cv2.findHomography(src, self.dst_pts)
+            H, _ = cv2.findHomography(src, self.dst_pts, cv2.RANSAC)
             homographies.append(H)
         print(f"Homographies computed: {len(homographies)}")
         return homographies
