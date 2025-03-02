@@ -9,6 +9,7 @@ def resize_and_save_images(image_paths, output_dir, scale_factor=0.5):
 
     resized_paths = []
     for img_path in image_paths:
+        assert os.path.exists(img_path), f"File not found: {img_path}"
         img = cv2.imread(img_path)
         print(f"Loading image: {img_path}")
         print(f"Original Image Shape: {img.shape[:-1]}")

@@ -103,7 +103,8 @@ def main(args):
 
     # Stitch images
     # Use cv2.Stitcher_SCANS for BEV generation
-    stitcher = cv2.Stitcher_create(cv2.Stitcher_SCANS)
+    stitcher_mode = cv2.Stitcher_SCANS if config["ENABLE_SCANS"] else cv2.Stitcher_PANORAMA
+    stitcher = cv2.Stitcher_create(stitcher_mode)
     status, stitched_image = stitcher.stitch(warped_images)
 
     if status == cv2.Stitcher_OK:
